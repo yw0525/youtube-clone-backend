@@ -1,7 +1,29 @@
 import { Service } from 'egg'
 
-export default class User extends Service {
-  public async create(name: string) {
-    return `hi, ${name}`
+export default class UserService extends Service {
+  get User() {
+    return this.app.model.User
+  }
+
+  findByUsername(username: string) {
+    return this.User.findOne({
+      username
+    })
+  }
+
+  findByEmail(email: string) {
+    return this.User.findOne({
+      email
+    })
+  }
+
+  async createUser(data) {
+    data.password = this.ctx.helper.md5(data.password)
+
+    const user = new this.User(data)
+
+    await user.save()
+
+    return user
   }
 }
