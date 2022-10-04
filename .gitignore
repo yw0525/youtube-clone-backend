@@ -21,3 +21,4 @@ config/**/*.map
 
 # config
 config/**/*.ts
+!config/plugin.ts
