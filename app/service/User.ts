@@ -1,4 +1,5 @@
 import { Service } from 'egg'
+import jwt from 'jsonwebtoken'
 
 export default class UserService extends Service {
   get User() {
@@ -25,5 +26,11 @@ export default class UserService extends Service {
     await user.save()
 
     return user
+  }
+
+  createToken(data) {
+    const { secret, expiresIn } = this.app.config.jwt
+
+    return jwt.sign(data, secret, { expiresIn })
   }
 }

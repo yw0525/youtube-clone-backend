@@ -5,6 +5,8 @@
   },
   "rules": {
     "semi": ["error", "never"],
+    "comma-dangle": ["error", "never"],
+    "array-bracket-spacing": ["error", "never"],
     "@typescript-eslint/semi": ["error", "never"]
   }
 }
