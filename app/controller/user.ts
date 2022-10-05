@@ -42,7 +42,7 @@ export default class UserController extends Controller {
     }
   }
 
-  async login() {
+  public async login() {
     const { ctx } = this
     const { body } = ctx.request
 
@@ -82,6 +82,20 @@ export default class UserController extends Controller {
         username,
         channelDescription: user.channelDescription,
         avatar: user.avatar
+      }
+    }
+  }
+
+  public async getCurrentUser() {
+    const { email, username, channelDescription, avatar } = this.ctx.user
+
+    this.ctx.body = {
+      user: {
+        email,
+        token: this.ctx.header.authorization,
+        username,
+        channelDescription,
+        avatar
       }
     }
   }

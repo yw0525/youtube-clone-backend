@@ -33,4 +33,8 @@ export default class UserService extends Service {
 
     return jwt.sign(data, secret, { expiresIn })
   }
+
+  verifyToken(token) {
+    return jwt.verify(token, this.app.config.jwt.secret)
+  }
 }
