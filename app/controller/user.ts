@@ -99,4 +99,57 @@ export default class UserController extends Controller {
       }
     }
   }
+
+  public async update() {
+    const { ctx } = this
+    const { body } = ctx.request
+
+    // 1. params validate
+    ctx.validate(
+      {
+        email: { type: 'email', required: false },
+        username: { type: 'string', required: false },
+        password: { type: 'string', required: false },
+        channelDescription: { type: 'string', required: false },
+        avatar: { type: 'string', required: false }
+      },
+      body
+    )
+
+    const userService = this.service.user
+    const { username, email, password } = ctx.request.body
+
+    // 2. data validate
+    if (username) {
+      if (
+        username !== ctx.user.username &&
+        (await userService.findByUsername(username))
+      ) {
+        ctx.throw(422, '用户已存在')
+      }
+    }
+    if (email) {
+      if (email !== ctx.user.email && (await userService.findByEmail(email))) {
+        ctx.throw(422, '邮箱已存在')
+      }
+    }
+    if (password) {
+      body.password = ctx.helper.md5(password)
+    }
+
+    // 3. update userinfo
+    const user = await userService.updateUser(body)
+
+    // 4. send response
+    this.ctx.body = {
+      user: {
+        email: user.email,
+        password: user.password,
+        token: this.ctx.header.authorization,
+        username: user.username,
+        channelDescription: user.channelDescription,
+        avatar: user.avatar
+      }
+    }
+  }
 }

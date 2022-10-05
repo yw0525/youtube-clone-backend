@@ -37,4 +37,8 @@ export default class UserService extends Service {
   verifyToken(token) {
     return jwt.verify(token, this.app.config.jwt.secret)
   }
+
+  async updateUser(data) {
+    return this.User.findByIdAndUpdate(this.ctx.user._id, data, { new: true })
+  }
 }
