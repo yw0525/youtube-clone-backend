@@ -12,4 +12,6 @@ export default (app: Application) => {
   router.post('/users/login', controller.user.login)
   router.get('/user', auth, controller.user.getCurrentUser)
   router.patch('/user', auth, controller.user.update)
+
+  router.post('/users/:userId/subscribe', auth, controller.user.subscribe)
 }

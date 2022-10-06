@@ -33,11 +33,15 @@ export default class UserController extends Controller {
     // 5. send response
     ctx.body = {
       user: {
-        email: user.email,
         token,
         username,
-        channelDescription: user.channelDescription,
-        avatar: user.avatar
+        ...ctx.helper.pick(user, [
+          'email',
+          'avatar',
+          'cover',
+          'channelDescription',
+          'subscribersCount'
+        ])
       }
     }
   }
@@ -77,25 +81,33 @@ export default class UserController extends Controller {
     // 4. send response
     ctx.body = {
       user: {
-        email: user.email,
         token,
         username,
-        channelDescription: user.channelDescription,
-        avatar: user.avatar
+        ...ctx.helper.pick(user, [
+          'email',
+          'avatar',
+          'cover',
+          'channelDescription',
+          'subscribersCount'
+        ])
       }
     }
   }
 
   public async getCurrentUser() {
-    const { email, username, channelDescription, avatar } = this.ctx.user
+    const { ctx } = this
 
-    this.ctx.body = {
+    ctx.body = {
       user: {
-        email,
-        token: this.ctx.header.authorization,
-        username,
-        channelDescription,
-        avatar
+        token: ctx.header.authorization,
+        ...ctx.helper.pick(ctx.user, [
+          'username',
+          'email',
+          'avatar',
+          'cover',
+          'channelDescription',
+          'subscribersCount'
+        ])
       }
     }
   }
@@ -143,12 +155,46 @@ export default class UserController extends Controller {
     // 4. send response
     this.ctx.body = {
       user: {
-        email: user.email,
-        password: user.password,
         token: this.ctx.header.authorization,
-        username: user.username,
-        channelDescription: user.channelDescription,
-        avatar: user.avatar
+        ...ctx.helper.pick(user, [
+          'username',
+          'email',
+          'password',
+          'avatar',
+          'cover',
+          'channelDescription',
+          'subscribersCount'
+        ])
+      }
+    }
+  }
+
+  public async subscribe() {
+    const { ctx } = this
+
+    const userId = ctx.user._id
+    const channelId = ctx.params.userId
+
+    // 1. validate
+    if (userId.equals(channelId)) {
+      ctx.throw(422, '用户不能订阅自己')
+    }
+
+    // 2. subscribe
+    const user = await this.service.user.subscribe(userId, channelId)
+
+    // 3. send response
+    ctx.body = {
+      user: {
+        ...ctx.helper.pick(user, [
+          'username',
+          'email',
+          'avatar',
+          'cover',
+          'channelDescription',
+          'subscribersCount'
+        ]),
+        isSubscribe: true
       }
     }
   }

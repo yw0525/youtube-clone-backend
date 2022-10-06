@@ -18,7 +18,7 @@ export default class UserService extends Service {
     }).select('+password')
   }
 
-  async createUser(data) {
+  async createUser(data: any) {
     data.password = this.ctx.helper.md5(data.password)
 
     const user = new this.User(data)
@@ -28,7 +28,7 @@ export default class UserService extends Service {
     return user
   }
 
-  createToken(data) {
+  createToken(data: any) {
     const { secret, expiresIn } = this.app.config.jwt
 
     return jwt.sign(data, secret, { expiresIn })
@@ -38,7 +38,34 @@ export default class UserService extends Service {
     return jwt.verify(token, this.app.config.jwt.secret)
   }
 
-  async updateUser(data) {
+  async updateUser(data: any) {
     return this.User.findByIdAndUpdate(this.ctx.user._id, data, { new: true })
+  }
+
+  async subscribe(userId: string, channelId: string) {
+    const { Subscription, User } = this.app.model
+
+    // 1. check if subscribed
+    const record = await Subscription.findOne({
+      user: userId,
+      channel: channelId
+    })
+
+    const user = await User.findById(channelId)
+
+    if (!record) {
+      // 2. subscribe
+      await new Subscription({
+        user: userId,
+        channel: channelId
+      }).save()
+
+      // 3. update userinfo
+      user.subscribersCount++
+      await user.save()
+    }
+
+    // 4. send userinfo
+    return user
   }
 }
