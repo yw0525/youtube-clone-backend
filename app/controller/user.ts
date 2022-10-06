@@ -262,4 +262,22 @@ export default class UserController extends Controller {
       }
     }
   }
+
+  public async getSubscriptions() {
+    const { ctx } = this
+
+    const { Subscription } = this.app.model
+
+    let subscriptions = await Subscription.find({
+      user: this.ctx.params.userId
+    }).populate('channel')
+
+    subscriptions = subscriptions.map(item =>
+      ctx.helper.pick(item.channel, ['_id', 'username', 'avatar'])
+    )
+
+    ctx.body = {
+      subscriptions
+    }
+  }
 }
