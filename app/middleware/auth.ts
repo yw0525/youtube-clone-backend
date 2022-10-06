@@ -1,7 +1,9 @@
 import { Context } from 'egg'
 import { JwtPayload } from 'jsonwebtoken'
 
-export default () => {
+export default (options = { required: true }) => {
+  const { required } = options
+
   return async function errorHandler(ctx: Context, next: () => Promise<any>) {
     try {
       // 1. get reuest headers token
@@ -9,21 +11,21 @@ export default () => {
 
       token = token ? token.split('Bearer ')[1] : null
 
-      // 2. verify
-      if (!token) {
-        ctx.throw(401)
-      }
+      if (token) {
+        try {
+          // 2. cache user info
+          const data = ctx.service.user.verifyToken(token) as JwtPayload
 
-      try {
-        // 3. cache user info
-        const data = ctx.service.user.verifyToken(token) as JwtPayload
-
-        if (data.userId) {
-          ctx.user = await ctx.model.User.findById(data.userId)
-        } else {
+          if (data.userId) {
+            ctx.user = await ctx.model.User.findById(data.userId)
+          } else {
+            ctx.throw(401)
+          }
+        } catch (error) {
           ctx.throw(401)
         }
-      } catch (error) {
+      } else if (required) {
+        // 3. verify
         ctx.throw(401)
       }
 

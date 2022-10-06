@@ -194,7 +194,7 @@ export default class UserController extends Controller {
           'channelDescription',
           'subscribersCount'
         ]),
-        isSubscribe: true
+        isSubscribed: true
       }
     }
   }
@@ -224,7 +224,41 @@ export default class UserController extends Controller {
           'channelDescription',
           'subscribersCount'
         ]),
-        isSubscribe: false
+        isSubscribed: false
+      }
+    }
+  }
+
+  public async getUser() {
+    const { ctx } = this
+
+    // 1. get subscribe status
+    let isSubscribed = false
+
+    if (ctx.user) {
+      const record = await this.app.model.Subscription.findOne({
+        user: ctx.user._id,
+        channel: ctx.params.userId
+      })
+
+      if (record) isSubscribed = true
+    }
+
+    // 2. get userinfo
+    const user = await this.app.model.User.findById(ctx.params.userId)
+
+    // 3. send response
+    ctx.body = {
+      user: {
+        ...ctx.helper.pick(user, [
+          'username',
+          'email',
+          'avatar',
+          'cover',
+          'channelDescription',
+          'subscribersCount'
+        ]),
+        isSubscribed
       }
     }
   }
