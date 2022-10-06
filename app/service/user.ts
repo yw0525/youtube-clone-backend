@@ -68,4 +68,28 @@ export default class UserService extends Service {
     // 4. send userinfo
     return user
   }
+
+  async unsubscribe(userId: string, channelId: string) {
+    const { Subscription, User } = this.app.model
+
+    // 1. check if subscribed
+    const record = await Subscription.findOne({
+      user: userId,
+      channel: channelId
+    })
+
+    const user = await User.findById(channelId)
+
+    if (record) {
+      // 2. unsubscribe
+      await record.remove()
+
+      // 3. update userinfo
+      user.subscribersCount--
+      await user.save()
+    }
+
+    // 4. send userinfo
+    return user
+  }
 }

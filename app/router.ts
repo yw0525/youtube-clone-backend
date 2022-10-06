@@ -14,4 +14,5 @@ export default (app: Application) => {
   router.patch('/user', auth, controller.user.update)
 
   router.post('/users/:userId/subscribe', auth, controller.user.subscribe)
+  router.delete('/users/:userId/subscribe', auth, controller.user.unsubscribe)
 }
